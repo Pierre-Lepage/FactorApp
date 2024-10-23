@@ -1,0 +1,8 @@
+# config/packages/staging/twig.yaml
+twig:
+    debug: true
+    strict_variables: true
+
+    # config/packages/twig.yaml
+    default_path: '%kernel.project_dir%/templates'
+    # Autres configurations globales

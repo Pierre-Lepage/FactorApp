@@ -1,24 +1,45 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
+# config/packages/staging/framework.yaml
 framework:
-    secret: '%env(APP_SECRET)%'
-    annotations: false
-    http_method_override: false
-    handle_all_throwables: true
+    router:
+        strict_requirements: true
+    profiler:
+        collect: true
+    cache:
+        app: cache.adapter.filesystem
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
-    session:
-        handler_id: null
-        cookie_secure: auto
-        cookie_samesite: lax
+# config/packages/staging/monolog.yaml
+monolog:
+    handlers:
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/staging.log"
+            level: debug
+            channels: ["!event"]
+        console:
+            type: console
+            process_psr_3_messages: false
+            channels: ["!event", "!doctrine", "!console"]
 
-    #esi: true
-    #fragments: true
-    php_errors:
-        log: true
+# config/packages/prod/framework.yaml
+framework:
+    router:
+        strict_requirements: null
+    profiler:
+        collect: false
+    cache:
+        app: cache.adapter.redis
+        default_redis_provider: '%env(REDIS_URL)%'
 
-when@test:
-    framework:
-        test: true
-        session:
-            storage_factory_id: session.storage.factory.mock_file
+# config/packages/prod/monolog.yaml
+monolog:
+    handlers:
+        main:
+            type: fingers_crossed
+            action_level: error
+            handler: nested
+            excluded_http_codes: [404, 405]
+            buffer_size: 50
+        nested:
+            type: stream
+            path: "%kernel.logs_dir%/prod.log"
+            level: debug
